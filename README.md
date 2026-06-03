@@ -33,7 +33,13 @@ http://localhost:8080
 Swagger:
 
 ```text
-http://localhost:8080/swagger-ui.html
+http://localhost:8080/swagger-ui/index.html
+```
+
+Health check:
+
+```text
+http://localhost:8080/health
 ```
 
 ## Variables
@@ -100,13 +106,59 @@ Errores retornan:
 
 ## Produccion
 
-Perfil Render PostgreSQL:
+El microservicio esta desplegado en Azure App Service:
+
+```text
+https://explorecr-auth-service-d3gzhsdjazexh9er.eastus2-01.azurewebsites.net
+```
+
+Swagger en produccion:
+
+```text
+https://explorecr-auth-service-d3gzhsdjazexh9er.eastus2-01.azurewebsites.net/swagger-ui/index.html
+```
+
+Health check en produccion:
+
+```text
+https://explorecr-auth-service-d3gzhsdjazexh9er.eastus2-01.azurewebsites.net/health
+```
+
+Variables de entorno usadas en Azure:
 
 ```env
 SPRING_PROFILE=render
-RENDER_POSTGRES_URL=jdbc:postgresql://host:5432/database
-RENDER_POSTGRES_USER=user
-RENDER_POSTGRES_PASSWORD=password
+RENDER_POSTGRES_URL=jdbc:postgresql://dpg-d8fp6i28qa3s73ah67bg-a.oregon-postgres.render.com:5432/explorecr_users
+RENDER_POSTGRES_USER=explorecr_admin
+RENDER_POSTGRES_PASSWORD=<password-de-render>
+ADMIN_EMAIL=admin@explorecr.com
+ADMIN_PASSWORD=<password-admin>
+SESSION_EXPIRATION_HOURS=24
+WEBSITES_PORT=8080
+WEBSITES_CONTAINER_START_TIME_LIMIT=1800
+```
+
+La base de datos de produccion esta en Render PostgreSQL. La aplicacion corre en Azure App Service usando una imagen Docker publicada en Azure Container Registry mediante GitHub Actions.
+
+## Despliegue
+
+El workflow de GitHub Actions se ejecuta al hacer push a `main`.
+
+Flujo:
+
+```text
+Maven build -> Docker build -> Push a ACR -> Deploy a Azure App Service
 ```
 
 El Dockerfile genera el JAR con Maven y corre la aplicacion en Java 21.
+
+## Integracion con otros microservicios
+
+Los otros microservicios pueden validar una sesion llamando:
+
+```http
+GET /auth/me
+Authorization: Bearer <session-uuid>
+```
+
+Si la sesion es valida, el servicio retorna los datos del usuario autenticado. Si no es valida, retorna `401 Unauthorized`.
