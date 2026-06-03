@@ -1,0 +1,28 @@
+package com.explorecr.auth.infrastructure.config;
+
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class OpenApiConfig {
+    @Bean
+    public OpenAPI authOpenApi() {
+        return new OpenAPI()
+            .info(new Info()
+                .title("Explore Costa Rica Auth Service")
+                .version("1.0.0")
+                .description("Auth and users API backed by UUID session tokens"))
+            .components(new Components()
+                .addSecuritySchemes("bearer-session", new SecurityScheme()
+                    .name("Authorization")
+                    .type(SecurityScheme.Type.HTTP)
+                    .scheme("bearer")
+                    .bearerFormat("UUID")))
+            .addSecurityItem(new SecurityRequirement().addList("bearer-session"));
+    }
+}

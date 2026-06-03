@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    url: ${RENDER_POSTGRES_URL}
+    username: ${RENDER_POSTGRES_USER}
+    password: ${RENDER_POSTGRES_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true

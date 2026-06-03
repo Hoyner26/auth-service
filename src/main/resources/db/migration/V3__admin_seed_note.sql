@@ -1,0 +1,3 @@
+-- Admin seeding is handled by the application when ADMIN_PASSWORD is provided.
+-- This keeps secrets out of source control while still allowing the first admin
+-- user to be created automatically in Render or Azure App Service.
