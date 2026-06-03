@@ -12,6 +12,9 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    env:
+      IMAGE_NAME: auth-service
+      IMAGE_TAG: ${{ github.sha }}
 
     steps:
       - uses: actions/checkout@v4
@@ -27,19 +30,20 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t auth-service .
-          docker tag auth-service ${{ secrets.ACR_LOGIN_SERVER }}/auth-service:latest
+          docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} .
+          docker tag ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:latest
 
       - name: Push to Azure Container Registry
         run: |
           echo "${{ secrets.ACR_PASSWORD }}" | docker login \
             "${{ secrets.ACR_LOGIN_SERVER }}" \
             -u "${{ secrets.ACR_USERNAME }}" --password-stdin
-          docker push ${{ secrets.ACR_LOGIN_SERVER }}/auth-service:latest
+          docker push ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          docker push ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:latest
 
       - name: Deploy to Azure App Service
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ secrets.AZURE_APP_SERVICE_AUTH }}
           publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE_AUTH }}
-          images: ${{ secrets.ACR_LOGIN_SERVER }}/auth-service:latest
+          images: ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
